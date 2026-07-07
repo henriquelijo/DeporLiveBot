@@ -26,7 +26,7 @@ def main():
         print(f"O partido está programado para as {match_info.match_time}. Aínda non comezou.")
         return
     
-    if match_info.match_status in ["Finished", "FT", "After ET"]:
+    if match_info.match_status in ["Finished", "FT", "After ET", "After Pen."]:
         print("O partido xa rematou. Non hai máis seguimento en directo.")
         return
 
@@ -34,7 +34,7 @@ def main():
     api = ApiFootballAdapter(api_key=os.getenv("X-RapidAPI-Key"), api_host=os.getenv("X-RapidAPI-Host"))
     notifier = TelegramBotAdapter(token=os.getenv("TELEGRAM_TOKEN"), chat_id=os.getenv("TELEGRAM_CHAT_ID"))
 
-    print("O partido xa ha comenzado o está en hora. Solicitando actualización en directo...")
+    print("O partido xa comezou o está en hora. Solicitando actualización en directo...")
 
     fresh_match = api.fetch_live_match_details(match_info.match_id)
     #print(f"Datos en directo obtenidos: {fresh_match.match_status if fresh_match else 'No se pudo obtener datos'}")
@@ -57,7 +57,7 @@ def main():
     alerts = match_info.verify_updates(fresh_match)
     
     # Comprobamos si ha terminado para limpiar el Cron o guardar estado intermedio
-    if match_info.match_status in ["Finished", "FT", "After ET"]:
+    if match_info.match_status in ["Finished", "FT", "After ET", "After Pen."]:
         print("O partido rematou agora.")
         repo.save_matches([match_info])
     else:
