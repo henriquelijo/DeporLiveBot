@@ -1,0 +1,76 @@
+[
+    {
+        "match_date": "2026-07-05",
+        "match_time": "22:00",
+        "home_team": "Brazil",
+        "away_team": "Norway",
+        "league_name": "World Cup - 1/8-finals",
+        "league_id": "28",
+        "match_id": "770734",
+        "match_live": "1",
+        "match_stadium": "",
+        "match_status": "Finished",
+        "home_score": "1",
+        "away_score": "2",
+        "cards": [
+            {
+                "time": "90+6",
+                "home_fault": "Neymar",
+                "card": "yellow card",
+                "away_fault": "",
+                "info": "",
+                "home_player_id": "322456720",
+                "away_player_id": "",
+                "score_info_time": "2nd Half"
+            }
+        ],
+        "substitutions": {
+            "home": [],
+            "away": []
+        },
+        "goalscorer": [
+            {
+                "time": "79",
+                "home_scorer": "",
+                "home_scorer_id": "",
+                "home_assist": "",
+                "home_assist_id": "",
+                "score": "0 - 1",
+                "away_scorer": "E. Haaland",
+                "away_scorer_id": "659972248",
+                "away_assist": "A. Schjelderup",
+                "away_assist_id": "2646475977",
+                "info": "",
+                "score_info_time": "2nd Half"
+            },
+            {
+                "time": "90",
+                "home_scorer": "",
+                "home_scorer_id": "",
+                "home_assist": "",
+                "home_assist_id": "",
+                "score": "0 - 2",
+                "away_scorer": "E. Haaland",
+                "away_scorer_id": "659972248",
+                "away_assist": "A. Schjelderup",
+                "away_assist_id": "2646475977",
+                "info": "",
+                "score_info_time": "2nd Half"
+            },
+            {
+                "time": "90+10",
+                "home_scorer": "Neymar",
+                "home_scorer_id": "322456720",
+                "home_assist": "",
+                "home_assist_id": "",
+                "score": "1 - 2",
+                "away_scorer": "",
+                "away_scorer_id": "",
+                "away_assist": "",
+                "away_assist_id": "",
+                "info": "Penalty",
+                "score_info_time": "2nd Half"
+            }
+        ]
+    }
+]
