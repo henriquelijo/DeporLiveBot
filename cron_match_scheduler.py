@@ -2,7 +2,7 @@
 import os
 import datetime
 # datetime ficticio de tu mockup
-today = datetime.datetime.now().strftime("%Y%m%d")
+today = datetime.datetime.now().strftime("%Y-%m-%d")
 #today = "2026-06-30" 
 # from datetime import datetime; today = datetime.now().strftime("%Y-%m-%d")
 
