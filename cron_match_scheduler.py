@@ -3,7 +3,7 @@ import os
 import datetime
 # datetime ficticio de tu mockup
 today = datetime.datetime.now().strftime("%Y-%m-%d")
-#today = "2026-06-30" 
+# today = "2026-06-30" 
 # from datetime import datetime; today = datetime.now().strftime("%Y-%m-%d")
 
 from dotenv import load_dotenv
