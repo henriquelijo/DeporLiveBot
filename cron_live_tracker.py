@@ -43,30 +43,30 @@ def main():
         return
     
     if fresh_match.match_status == "0":
-        print("O partido aínda non ha comenzado segundo a API. Esperando á próxima iteración...")
-        return
+        print("O partido aínda non comezou segundo a API. Esperando á próxima iteración...")
+        #return
 
-    # Si es la primera vez que entramos (goles y tarjetas están inicializados en blanco/cero)
-    # y el partido ya ha empezado en la API, mandamos el aviso de inicio
-    if match_info.match_status == "" and fresh_match.match_live == "1":
+    if match_info.match_live == "0" and fresh_match.match_live == "1":
         notifier.send_notification("⚽ <b>Empeza o partido</b>")
         match_info.match_status = fresh_match.match_status
         match_info.match_live = fresh_match.match_live
+        repo.save_matches([match_info]) # Save after initial notification
 
     # Dejamos que el DOMINIO compare el estado antiguo con el nuevo y extraiga las alertas
     alerts = match_info.verify_updates(fresh_match)
     
     # Comprobamos si ha terminado para limpiar el Cron o guardar estado intermedio
-    if match_info.match_status in ["Finished", "FT", "After ET", "After Pen."]:
+    if fresh_match.match_status in ["Finished", "FT", "After ET", "After Pen."]:
         print("O partido rematou agora.")
-        repo.save_matches([match_info])
+        repo.save_matches([fresh_match])  # Save the finished match details
+        
     else:
-        # Guardamos el partido con sus datos actualizados (marcador, tarjetas registradas, etc.)
-        # para que en la próxima iteración dentro de 2 minutos compare sobre esta base.
-        repo.save_matches([match_info])
+        
+        repo.save_matches([fresh_match]) 
 
     # Si hay novedades, las notificamos por Telegram
     for alert in alerts:
+        
         notifier.send_notification(alert)
 
 
