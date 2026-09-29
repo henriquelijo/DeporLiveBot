@@ -1,5 +1,6 @@
 # src/domain/models.py
 from dataclasses import dataclass, field
+import os
 from typing import List, Dict, Optional
 
 
@@ -33,6 +34,8 @@ class Match:
     match_status: str
     home_score: str
     away_score: str
+    home_team_id: str
+    away_team_id: str
     cards: List[Dict] = field(default_factory=list)
     substitutions: Dict[str, List[Dict]] = field(
         default_factory=lambda: {"home": [], "away": []}
@@ -47,13 +50,23 @@ class Match:
         """Determina si el partido ha finalizado."""
         return self.match_status.lower() in ["finished", "ft", "finalizado"]
 
-   # Reemplazar el método verify_updates en src/domain/models.py con este:
+    def depor_local_or_away(self) -> Optional[Dict[str, str]]:
+        """Devolve 'local' se o Depor é o equipo local, 'away' se é visitante."""
+        depor_team_id = os.getenv("TEAM_ID")  # Reemplaza con el ID real del Depor
+        if self.home_team_id == depor_team_id:
+            return {'depor': 'home', 'rival': 'away_team'}
+        if self.away_team_id == depor_team_id:
+            return {'depor': 'away', 'rival': 'home_team'}
+        return None
+
+    # verifica actualizacións do partido e devolve alertas se hai cambios significativos
     def verify_updates(self, fresh_match: "Match") -> List[str]:
         updates = []
-        
+
+        depor_position = self.depor_local_or_away()
         # 1. Goles
         if fresh_match.home_score != self.home_score or fresh_match.away_score != self.away_score:
-            
+           
             current_goal_identifiers = {
                 f"{g.get('time')}-{g.get('home_scorer') or g.get('away_scorer')}-{g.get('score')}"
                 for g in self.goalscorer
@@ -62,22 +75,42 @@ class Match:
                 f"{g.get('time')}-{g.get('home_scorer') or g.get('away_scorer')}-{g.get('score')}"
                 for g in fresh_match.goalscorer
             }
-
-            # Detectar nuevos goles
+            
+            # Detectar novos goles
             new_goals = [
                 goal for goal in fresh_match.goalscorer
                 if f"{goal.get('time')}-{goal.get('home_scorer') or goal.get('away_scorer')}-{goal.get('score')}" not in current_goal_identifiers
             ]
+            
             for goal in new_goals:
-                scorer = goal.get('home_scorer') or goal.get('away_scorer') or "Descoñecido"
+               
+                if goal.get('home_scorer'):
+                    scoring_side = 'home'
+                    scorer = goal.get('home_scorer')
+                elif goal.get('away_scorer'):
+                    scoring_side = 'away'
+                    scorer = goal.get('away_scorer')
+                else:
+                    scoring_side = 'unknown'
+                    scorer = "Descoñecido"
+
                 time = goal.get("time", "")
                 score = goal.get("score", "")
+
+                is_depor_goal = (scoring_side == depor_position.get('depor')) if depor_position else False
+
+                if scoring_side == 'unknown':
+                    header = "⚽ <b>GOL!</b> ⚽"
+                elif is_depor_goal:
+                    header = "🩵 <b>¡GOOOOL DO DÉPOR!</b> 👏🎉"
+                else:
+                    header = f"😩 <b>Gol do {getattr(self, depor_position['rival'])}</b>... 💔"
+                print(f"Detectado gol: {scorer} no minuto {time}. Marcador: {score}. Depor goal? {is_depor_goal}")
                 updates.append(
-                    f"⚽ <b>GOL!</b> ⚽\n"
+                    f"{header}\n"
                     f"<b>{scorer}</b> marcou no minuto {time}.\n"
                     f"Marcador: <b>{fresh_match.home_team}</b> {score} <b>{fresh_match.away_team}</b>"
                 )
-            
             # Detectar goles anulados o desaparecidos
             cancelled_goals = [
                 goal for goal in self.goalscorer
@@ -98,7 +131,7 @@ class Match:
             self.away_score = fresh_match.away_score
             self.goalscorer = fresh_match.goalscorer
 
-        # 2. Tarjetas (Sigue igual...)
+        # 2. Tarxetas
         if len(fresh_match.cards) > len(self.cards):
             new_cards = fresh_match.cards[len(self.cards):]
             for card in new_cards:
@@ -117,14 +150,14 @@ class Match:
                 )
             elif fresh_match.match_status in ["0", "Finished", "FT", "Finalizado"]:
                 updates.append(
-                    f"🏁 <b>Final do Partido</b>\n\nResultado definitivo:\n"
+                    f"<b>Final do Partido</b>\n\nResultado definitivo:\n"
                     f"<b> {fresh_match.home_team}</b> {fresh_match.home_score} - "
                     f"{fresh_match.away_score} <b>{fresh_match.away_team}</b>"
                 )
             self.match_status = fresh_match.match_status
             self.match_live = fresh_match.match_live
 
-        # 4. Sustituciones
+        # 4. Sustitucións
         for team_type in ["home", "away"]:
             current_subs = {(s.get("time"), s.get("player_out"), s.get("player_in")) for s in self.substitutions[team_type]}
             for sub in fresh_match.substitutions[team_type]:
@@ -161,7 +194,9 @@ class Match:
             match_date=data["match_date"],
             match_time=data["match_time"],
             home_team=data["home_team"],
+            home_team_id=data["home_team_id"],
             away_team=data["away_team"],
+            away_team_id=data["away_team_id"],
             league_name=data["league_name"],
             league_id=data["league_id"],
             match_id=data["match_id"],
