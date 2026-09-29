@@ -1,13 +1,14 @@
 # cron_match_scheduler.py
 import os
 import datetime
-# datetime ficticio de tu mockup
+
+# datetime ficticio de mockup
 today = datetime.datetime.now().strftime("%Y-%m-%d")
 # today = "2026-06-30" 
 # from datetime import datetime; today = datetime.now().strftime("%Y-%m-%d")
 
 from dotenv import load_dotenv
-from src.adapters import JSONMatchRepository, ApiFootballAdapter
+from src.adapters import JSONMatchRepository, ApiFootballAdapter, TelegramBotAdapter
 
 def main():
     load_dotenv()
@@ -40,10 +41,13 @@ def main():
     except Exception as e:
         print(f"Erro ao obter partidos: {e}")
         matches = []
-    # Guardamos los partidos obtenidos en el repositorio JSON
+    # Gardamos os partidos obtidos no repositorio JSON
     if matches:
         repo.save_matches(matches)
         print(f"¡Partido programado gardado con éxito! ({matches[0].home_team} vs {matches[0].away_team})")
+        alert_match = f"⚽ <b>Hoxe xogan:</b>\n{matches[0].home_team} vs {matches[0].away_team}\nHora: {matches[0].match_time}\nEstadio: {matches[0].match_stadium}"
+        notifier = TelegramBotAdapter(token=os.getenv("TELEGRAM_TOKEN"), chat_id=os.getenv("TELEGRAM_CHAT_ID"))
+        notifier.send_notification(alert_match)
     else:
         print("Non se encontraron eventos para hoxe.")
 

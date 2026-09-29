@@ -64,9 +64,9 @@ def main():
         
         repo.save_matches([fresh_match]) 
 
-    # Si hay novedades, las notificamos por Telegram
+    # Se hai novidades, notificamos por Telegram
     for alert in alerts:
-        
+        print(f"Enviando alerta: {alert}")    
         notifier.send_notification(alert)
 
 
